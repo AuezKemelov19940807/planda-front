@@ -1,0 +1,9 @@
+{
+  "HomePage": {
+    "title": "Добро пожаловать в PlanDa"
+  },
+   "AboutPage": {
+    "title": "О нас",
+    "description": "Это страница о нашем проекте."
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "HomePage": {
+    "title": "Welcome to PlanDa"
+  },
+   "AboutPage": {
+    "title": "About us",
+    "description": "This is the about page."
+  }
+}
