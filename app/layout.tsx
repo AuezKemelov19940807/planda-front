@@ -2,6 +2,8 @@ import { ThemeProvider } from "next-themes";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ApolloProviderWrapper } from "@/lib/apollo/provider";
+import { GoogleProvider } from "@/google/google-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +27,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased `}
     >
       <body className="min-h-full flex flex-col duration-300 transition-all">
-        <ThemeProvider attribute="class" enableSystem defaultTheme="system">
-          {children}
+        <ThemeProvider
+          attribute="class"
+          enableSystem
+          defaultTheme="system"
+          disableTransitionOnChange
+        >
+          <ApolloProviderWrapper>
+            <GoogleProvider>{children}</GoogleProvider>
+          </ApolloProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

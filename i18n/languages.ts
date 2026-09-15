@@ -6,6 +6,6 @@ export const languages = [
 
 export const locales = languages.map((language) => language.code);
 
-export const defaultLocale = "ru";
+export const defaultLocale = "kk";
 
 export type Locale = (typeof locales)[number];
