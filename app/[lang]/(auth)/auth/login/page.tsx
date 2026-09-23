@@ -8,6 +8,7 @@ import { ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   Card,
   CardContent,
@@ -20,6 +21,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 
 import { SIGN_IN } from "@/graphql/mutations/auth/sign-in";
 import { GOOGLE_SIGN_IN } from "@/graphql/mutations/auth/google-sign-in";
+
 import { PasswordInput } from "@/components/auth/password-input";
 
 export default function LoginPage() {
@@ -45,7 +47,7 @@ export default function LoginPage() {
         },
       });
 
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch {
       // Error is handled by Apollo state.
     }
@@ -59,7 +61,7 @@ export default function LoginPage() {
         },
       });
 
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch {
       // Error is handled by Apollo state.
     }
@@ -87,21 +89,21 @@ export default function LoginPage() {
 
         <CardContent className="space-y-6">
           {/* Google */}
-
           <div className="flex justify-center">
             <GoogleLogin
               onSuccess={(response) => {
                 if (response.credential) {
-                  handleGoogleSuccess(response.credential);
+                  void handleGoogleSuccess(response.credential);
                 }
               }}
-              onError={() => {}}
-              width="100%"
+              onError={() => {
+                console.error("Google Login failed");
+              }}
+              useOneTap={false}
             />
           </div>
 
           {/* Divider */}
-
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -113,10 +115,8 @@ export default function LoginPage() {
           </div>
 
           {/* Email / Password */}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
 
@@ -137,7 +137,6 @@ export default function LoginPage() {
             </div>
 
             {/* Password */}
-
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Пароль</Label>
@@ -158,7 +157,6 @@ export default function LoginPage() {
             </div>
 
             {/* Error */}
-
             {error && (
               <p className="text-sm text-destructive">
                 Не удалось выполнить вход. Проверьте данные и попробуйте снова.
@@ -166,14 +164,12 @@ export default function LoginPage() {
             )}
 
             {/* Submit */}
-
             <Button type="submit" className="w-full" disabled={loading}>
               {signInLoading ? "Вход..." : "Войти"}
             </Button>
           </form>
 
           {/* Register */}
-
           <p className="text-center text-sm text-muted-foreground">
             Нет аккаунта?{" "}
             <Link
@@ -185,7 +181,6 @@ export default function LoginPage() {
           </p>
 
           {/* Back */}
-
           <div className="text-center">
             <Link
               href="/"

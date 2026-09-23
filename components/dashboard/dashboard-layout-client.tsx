@@ -14,7 +14,7 @@ interface User {
 }
 
 interface MeQuery {
-  me: User;
+  me: User | null;
 }
 
 export function DashboardLayoutClient({
@@ -22,7 +22,9 @@ export function DashboardLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
-  const { data, loading } = useQuery<MeQuery>(ME_QUERY);
+  const { data, loading, error } = useQuery<MeQuery>(ME_QUERY, {
+    fetchPolicy: "network-only",
+  });
 
   if (loading) {
     return (
@@ -32,8 +34,26 @@ export function DashboardLayoutClient({
     );
   }
 
+  if (error) {
+    console.error("ME_QUERY ERROR:", error);
+
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-destructive">
+          Не удалось загрузить пользователя.
+        </p>
+      </div>
+    );
+  }
+
   if (!data?.me) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">
+          Пользователь не авторизован.
+        </p>
+      </div>
+    );
   }
 
   return (

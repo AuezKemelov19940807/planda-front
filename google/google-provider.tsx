@@ -7,9 +7,13 @@ interface GoogleProviderProps {
 }
 
 export function GoogleProvider({ children }: GoogleProviderProps) {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  if (!clientId) {
+    throw new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not defined");
+  }
+
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-      {children}
-    </GoogleOAuthProvider>
+    <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
   );
 }
