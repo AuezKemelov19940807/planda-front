@@ -6,6 +6,7 @@ export const SIGN_IN = gql`
       id
       name
       avatar
+      access_token
     }
   }
 `;

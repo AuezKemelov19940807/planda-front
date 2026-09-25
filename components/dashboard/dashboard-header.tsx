@@ -16,15 +16,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { LOGOUT_MUTATION } from "@/graphql/mutations/logout";
 
-interface User {
-  id: string;
-  email: string;
-  name?: string | null;
-  avatar?: string | null;
-}
-
 interface DashboardHeaderProps {
-  user: User;
+  user: User | null;
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -57,7 +50,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             disabled={loading}
             className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-medium outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {user.avatar ? (
+            {user?.avatar ? (
               <img
                 src={user.avatar}
                 alt={user.name ?? user.email}
@@ -67,7 +60,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               <CircleUserRound className="h-8 w-8" />
             )}
 
-            <span className="hidden md:block">{user.name ?? user.email}</span>
+            <span className="hidden md:block">
+              {user?.name ?? user?.email ?? "Пользователь"}
+            </span>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">

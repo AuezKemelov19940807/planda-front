@@ -1,5 +1,5 @@
 "use client";
-
+import Cookies from "js-cookie";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, Mail } from "lucide-react";
@@ -22,6 +22,12 @@ import { GOOGLE_SIGN_IN } from "@/graphql/mutations/auth/google-sign-in";
 
 import { PasswordInput } from "@/components/auth/password-input";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import {
+  GoogleSignInResponse,
+  GoogleSignInVariables,
+  SignInResponse,
+  SignInVariables,
+} from "@/graphql/types/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -29,21 +35,36 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [signIn, { loading: signInLoading, error: signInError }] =
-    useMutation(SIGN_IN);
+  const [signIn, { loading: signInLoading, error: signInError }] = useMutation<
+    SignInResponse,
+    SignInVariables
+  >(SIGN_IN);
 
   const [googleSignIn, { loading: googleLoading, error: googleError }] =
-    useMutation(GOOGLE_SIGN_IN);
+    useMutation<GoogleSignInResponse, GoogleSignInVariables>(GOOGLE_SIGN_IN);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      await signIn({
+      const result = await signIn({
         variables: {
           email,
           password,
         },
+      });
+
+      const token = result.data?.signIn.access_token;
+
+      if (!token) {
+        return;
+      }
+
+      Cookies.set("access_token", token, {
+        expires: 7,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
       });
 
       router.replace("/dashboard");
@@ -54,10 +75,23 @@ export function LoginForm() {
 
   const handleGoogleSuccess = async (credential: string) => {
     try {
-      await googleSignIn({
+      const result = await googleSignIn({
         variables: {
           credential,
         },
+      });
+
+      const token = result.data?.googleSignIn.access_token;
+
+      if (!token) {
+        return;
+      }
+
+      Cookies.set("access_token", token, {
+        expires: 7,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
       });
 
       router.replace("/dashboard");

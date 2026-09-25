@@ -7,6 +7,7 @@ export const GOOGLE_SIGN_IN = gql`
       email
       name
       avatar
+      access_token
     }
   }
 `;

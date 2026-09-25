@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@apollo/client/react";
-
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { ME_QUERY } from "@/graphql/queries/me";
+import { useRouter } from "@/i18n/navigation";
 
 interface User {
   id: string;
@@ -22,43 +23,25 @@ export function DashboardLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
   const { data, loading, error } = useQuery<MeQuery>(ME_QUERY, {
     fetchPolicy: "network-only",
   });
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        Загрузка...
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!loading && (error || !data?.me)) {
+      router.replace("/auth/login");
+    }
+  }, [loading, error, data, router]);
 
-  if (error) {
-    console.error("ME_QUERY ERROR:", error);
-
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-destructive">
-          Не удалось загрузить пользователя.
-        </p>
-      </div>
-    );
-  }
-
-  if (!data?.me) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          Пользователь не авторизован.
-        </p>
-      </div>
-    );
+  if (error || (!loading && !data?.me)) {
+    return null;
   }
 
   return (
     <div className="min-h-screen">
-      <DashboardHeader user={data.me} />
+      <DashboardHeader user={data?.me ?? null} />
 
       <div className="flex">
         <DashboardSidebar />

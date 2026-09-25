@@ -1,6 +1,10 @@
-export type User = {
+interface User {
   id: string;
   email: string;
-  name: string | null;
-  avatar: string | null;
-};
+  name?: string | null;
+  avatar?: string | null;
+}
+
+interface MeQuery {
+  me: User | null;
+}
