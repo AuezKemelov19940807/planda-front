@@ -61,7 +61,7 @@ export function LoginForm() {
       }
 
       Cookies.set("access_token", token, {
-        expires: 7,
+        expires: 1,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -88,7 +88,7 @@ export function LoginForm() {
       }
 
       Cookies.set("access_token", token, {
-        expires: 7,
+        expires: 1,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
