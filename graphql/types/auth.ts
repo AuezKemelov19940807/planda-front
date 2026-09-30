@@ -3,6 +3,8 @@ export interface SignInResponse {
     access_token: string;
     name: string;
     id: string;
+    email: string;
+    avatar: string;
   };
 }
 
@@ -35,4 +37,13 @@ export interface GoogleSignInResponse {
 
 export interface GoogleSignInVariables {
   credential: string;
+}
+
+export interface UpdateUserPayload {
+  avatar?: string;
+  name: string;
+}
+
+export interface UpdateUserMutationData {
+  updateUser: User;
 }

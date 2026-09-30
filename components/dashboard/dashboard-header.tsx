@@ -1,7 +1,14 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { Bell, CircleUserRound, LogOut, Settings, User } from "lucide-react";
+import {
+  Bell,
+  CircleUserRound,
+  LogOut,
+  Settings,
+  User as UserIcon,
+} from "lucide-react";
+import Cookies from "js-cookie";
 
 import {
   DropdownMenu,
@@ -10,11 +17,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { Button } from "@/components/ui/button";
-
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { LOGOUT_MUTATION } from "@/graphql/mutations/logout";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface DashboardHeaderProps {
   user: User | null;
@@ -25,10 +31,19 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const [logOut, { loading }] = useMutation(LOGOUT_MUTATION);
 
+  const clearUser = useAuthStore((state) => state.clearUser);
+
   const handleLogout = async () => {
     try {
       await logOut();
-      router.push("/auth/login");
+
+      clearUser();
+
+      Cookies.remove("access_token", {
+        path: "/",
+      });
+
+      router.replace("/auth/login");
     } catch {
       // Ошибка обрабатывается Apollo
     }
@@ -39,12 +54,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
       <h1 className="text-lg font-semibold">Обзор</h1>
 
       <div className="flex items-center gap-2">
-        {/* Notifications */}
         <Button variant="ghost" size="icon" aria-label="Уведомления">
           <Bell className="h-5 w-5" />
         </Button>
 
-        {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={loading}
@@ -66,10 +79,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
+            <Link className="flex items-center ml-1" href="/dashboard/profile">
+              <UserIcon className="mr-2 h-4 w-4" />
               Профиль
-            </DropdownMenuItem>
+            </Link>
 
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />

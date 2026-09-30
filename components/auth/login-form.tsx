@@ -28,6 +28,7 @@ import {
   SignInResponse,
   SignInVariables,
 } from "@/graphql/types/auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function LoginForm() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function LoginForm() {
 
   const [googleSignIn, { loading: googleLoading, error: googleError }] =
     useMutation<GoogleSignInResponse, GoogleSignInVariables>(GOOGLE_SIGN_IN);
-
+  const setUser = useAuthStore((state) => state.setUser);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -54,17 +55,24 @@ export function LoginForm() {
         },
       });
 
-      const token = result.data?.signIn.access_token;
+      const auth = result.data?.signIn;
 
-      if (!token) {
+      if (!auth?.access_token) {
         return;
       }
 
-      Cookies.set("access_token", token, {
+      Cookies.set("access_token", auth.access_token, {
         expires: 1,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
+      });
+
+      setUser({
+        id: auth.id,
+        email: auth.email,
+        name: auth.name,
+        avatar: auth.avatar,
       });
 
       router.replace("/dashboard");
@@ -81,17 +89,24 @@ export function LoginForm() {
         },
       });
 
-      const token = result.data?.googleSignIn.access_token;
+      const auth = result.data?.googleSignIn;
 
-      if (!token) {
+      if (!auth?.access_token) {
         return;
       }
 
-      Cookies.set("access_token", token, {
+      Cookies.set("access_token", auth.access_token, {
         expires: 1,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
+      });
+
+      setUser({
+        id: auth.id,
+        email: auth.email,
+        name: auth.name,
+        avatar: auth.avatar,
       });
 
       router.replace("/dashboard");

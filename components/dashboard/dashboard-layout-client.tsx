@@ -2,20 +2,21 @@
 
 import { useEffect } from "react";
 import { useQuery } from "@apollo/client/react";
+import Cookies from "js-cookie";
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { ME_QUERY } from "@/graphql/queries/me";
+import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "@/i18n/navigation";
 
-interface User {
-  id: string;
-  email: string;
-  name?: string | null;
-  avatar?: string | null;
-}
-
 interface MeQuery {
-  me: User | null;
+  me: {
+    id: string;
+    email: string;
+    name?: string | null;
+    avatar?: string | null;
+  } | null;
 }
 
 export function DashboardLayoutClient({
@@ -25,23 +26,34 @@ export function DashboardLayoutClient({
 }) {
   const router = useRouter();
 
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+  const clearUser = useAuthStore((state) => state.clearUser);
+
   const { data, loading, error } = useQuery<MeQuery>(ME_QUERY, {
     fetchPolicy: "network-only",
   });
 
   useEffect(() => {
-    if (!loading && (error || !data?.me)) {
+    if (data?.me) {
+      setUser(data.me);
+      return;
+    }
+
+    if (!loading && error) {
+      clearUser();
+
+      Cookies.remove("access_token", {
+        path: "/",
+      });
+
       router.replace("/auth/login");
     }
-  }, [loading, error, data, router]);
-
-  if (error || (!loading && !data?.me)) {
-    return null;
-  }
+  }, [data, loading, error, setUser, clearUser, router]);
 
   return (
     <div className="min-h-screen">
-      <DashboardHeader user={data?.me ?? null} />
+      <DashboardHeader user={user} />
 
       <div className="flex">
         <DashboardSidebar />

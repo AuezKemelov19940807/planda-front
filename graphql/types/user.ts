@@ -3,6 +3,7 @@ interface User {
   email: string;
   name?: string | null;
   avatar?: string | null;
+  hasPassword: boolean;
 }
 
 interface MeQuery {

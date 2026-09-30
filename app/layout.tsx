@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { ApolloProviderWrapper } from "@/lib/apollo/provider";
 import { GoogleProvider } from "@/google/google-provider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,23 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <GoogleProvider>{children}</GoogleProvider>
           </ApolloProviderWrapper>
         </ThemeProvider>
+        <Toaster
+          position="top-right"
+          closeButton
+          expand
+          theme="dark"
+          toastOptions={{
+            classNames: {
+              toast: "!bg-zinc-950 !text-white !border !border-yellow-500",
+              title: "!text-white",
+              description: "!text-zinc-300",
+              success: "!bg-zinc-950 !border-l-4 !border-l-yellow-400",
+              error: "!bg-zinc-950 !border-l-4 !border-l-red-500",
+              warning: "!bg-zinc-950 !border-l-4 !border-l-yellow-500",
+              info: "!bg-zinc-950 !border-l-4 !border-l-blue-500",
+            },
+          }}
+        />
       </body>
     </html>
   );
