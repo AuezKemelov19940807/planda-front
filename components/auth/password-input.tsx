@@ -11,6 +11,7 @@ interface PasswordInputProps {
   value: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  autoComplete?: string;
 }
 
 export function PasswordInput({
@@ -18,6 +19,7 @@ export function PasswordInput({
   value,
   onChange,
   placeholder = "••••••••",
+  autoComplete = "current-password",
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -30,7 +32,7 @@ export function PasswordInput({
         onChange={onChange}
         placeholder={placeholder}
         className="pr-10"
-        autoComplete="current-password"
+        autoComplete={autoComplete}
       />
 
       <Button

@@ -5,6 +5,7 @@ export interface SignInResponse {
     id: string;
     email: string;
     avatar: string;
+    hasPassword: boolean;
   };
 }
 
@@ -32,6 +33,7 @@ export interface GoogleSignInResponse {
     email: string;
     avatar: string | null;
     access_token: string;
+    hasPassword: boolean;
   };
 }
 
@@ -46,4 +48,23 @@ export interface UpdateUserPayload {
 
 export interface UpdateUserMutationData {
   updateUser: User;
+}
+
+export interface SignUpVariables {
+  payload: {
+    name: string;
+    email: string;
+    password: string;
+    avatar: string;
+  };
+}
+
+export interface SignUpResponse {
+  signUp: {
+    id: string;
+    name: string | null;
+    email: string;
+    avatar: string | null;
+    access_token: string;
+  };
 }

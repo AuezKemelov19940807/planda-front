@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, Mail } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +15,8 @@ import {
 } from "@/components/ui/card";
 
 import { Link, useRouter } from "@/i18n/navigation";
-
 import { SIGN_IN } from "@/graphql/mutations/auth/sign-in";
 import { GOOGLE_SIGN_IN } from "@/graphql/mutations/auth/google-sign-in";
-
 import { PasswordInput } from "@/components/auth/password-input";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import {
@@ -73,6 +70,7 @@ export function LoginForm() {
         email: auth.email,
         name: auth.name,
         avatar: auth.avatar,
+        hasPassword: auth.hasPassword,
       });
 
       router.replace("/dashboard");
@@ -107,9 +105,10 @@ export function LoginForm() {
         email: auth.email,
         name: auth.name,
         avatar: auth.avatar,
+        hasPassword: auth.hasPassword,
       });
 
-      router.replace("/dashboard");
+      router.replace("/auth/login");
     } catch {
       // Error is handled by Apollo state.
     }

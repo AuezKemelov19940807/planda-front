@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LOGOUT_MUTATION } from "@/graphql/mutations/logout";
 import { useAuthStore } from "@/stores/auth-store";
+import { ModeToggle } from "../common/mode-toggle";
 
 interface DashboardHeaderProps {
   user: User | null;
@@ -54,6 +55,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
       <h1 className="text-lg font-semibold">Обзор</h1>
 
       <div className="flex items-center gap-2">
+        <ModeToggle />
         <Button variant="ghost" size="icon" aria-label="Уведомления">
           <Bell className="h-5 w-5" />
         </Button>

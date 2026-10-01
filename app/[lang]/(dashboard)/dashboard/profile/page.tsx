@@ -38,6 +38,7 @@ import { UPDATE_USER_MUTATION } from "@/graphql/mutations/auth/update-user";
 import { CHANGE_PASSWORD_MUTATION } from "@/graphql/mutations/auth/change-password";
 
 import { UpdateUserMutationData } from "@/graphql/types/auth";
+import { PasswordInput } from "@/components/auth/password-input";
 
 export default function DashboardProfile() {
   const user = useAuthStore((state) => state.user);
@@ -295,9 +296,8 @@ export default function DashboardProfile() {
               <div className="space-y-2">
                 <Label htmlFor="current-password">Текущий пароль</Label>
 
-                <Input
+                <PasswordInput
                   id="current-password"
-                  type="password"
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
                   placeholder="Введите текущий пароль"
@@ -309,9 +309,8 @@ export default function DashboardProfile() {
               <div className="space-y-2">
                 <Label htmlFor="new-password">Новый пароль</Label>
 
-                <Input
+                <PasswordInput
                   id="new-password"
-                  type="password"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   placeholder="Минимум 8 символов"
@@ -325,9 +324,8 @@ export default function DashboardProfile() {
                   Подтвердите новый пароль
                 </Label>
 
-                <Input
+                <PasswordInput
                   id="confirm-password"
-                  type="password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Повторите новый пароль"

@@ -12,11 +12,13 @@ import { Button } from "@/components/ui/button";
 
 export function DashboardSidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 border-r bg-background md:flex md:flex-col">
+    <aside className="hidden w-64 min-h-full shrink-0 border-r bg-background md:flex  md:flex-col">
+      {/* Logo */}
       <div className="flex h-16 items-center border-b px-6">
         <span className="text-xl font-bold tracking-tight">PlanDa</span>
       </div>
 
+      {/* Main navigation */}
       <nav className="flex-1 space-y-1 p-4">
         <Button variant="secondary" className="w-full justify-start gap-3">
           <LayoutDashboard className="h-4 w-4" />
@@ -39,6 +41,7 @@ export function DashboardSidebar() {
         </Button>
       </nav>
 
+      {/* Footer */}
       <div className="border-t p-4">
         <Button variant="ghost" className="w-full justify-start gap-3">
           <Settings className="h-4 w-4" />

@@ -10,15 +10,6 @@ import { ME_QUERY } from "@/graphql/queries/me";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "@/i18n/navigation";
 
-interface MeQuery {
-  me: {
-    id: string;
-    email: string;
-    name?: string | null;
-    avatar?: string | null;
-  } | null;
-}
-
 export function DashboardLayoutClient({
   children,
 }: {
@@ -52,10 +43,12 @@ export function DashboardLayoutClient({
   }, [data, loading, error, setUser, clearUser, router]);
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
+      {/* Header */}
       <DashboardHeader user={user} />
 
-      <div className="flex">
+      {/* Body */}
+      <div className="flex flex-1">
         <DashboardSidebar />
 
         <main className="flex-1">{children}</main>
