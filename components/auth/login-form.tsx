@@ -108,7 +108,7 @@ export function LoginForm() {
         hasPassword: auth.hasPassword,
       });
 
-      router.replace("/auth/login");
+      router.replace("/dashboard");
     } catch {
       // Error is handled by Apollo state.
     }

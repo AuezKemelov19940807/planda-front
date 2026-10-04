@@ -39,6 +39,8 @@ import { CHANGE_PASSWORD_MUTATION } from "@/graphql/mutations/auth/change-passwo
 
 import { UpdateUserMutationData } from "@/graphql/types/auth";
 import { PasswordInput } from "@/components/auth/password-input";
+import { CREATE_UPLOAD_URL_MUTATION } from "@/graphql/mutations/files/create-upload-url";
+import { CreateUploadUrlResponse } from "@/graphql/types/createUploadUrlInput";
 
 export default function DashboardProfile() {
   const user = useAuthStore((state) => state.user);
@@ -49,6 +51,9 @@ export default function DashboardProfile() {
 
   const [updateUser, { loading }] =
     useMutation<UpdateUserMutationData>(UPDATE_USER_MUTATION);
+
+  const [createUploadUrl, { loading: uploadingAvatar }] =
+    useMutation<CreateUploadUrlResponse>(CREATE_UPLOAD_URL_MUTATION);
 
   // Change password
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -151,6 +156,89 @@ export default function DashboardProfile() {
     user?.email?.slice(0, 2).toUpperCase() ??
     "U";
 
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file || !user) return;
+
+    // Проверяем тип
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Разрешены только JPG, PNG и WebP");
+      event.target.value = "";
+      return;
+    }
+
+    // Максимум 5 MB
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Размер изображения не должен превышать 5 МБ");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      // 1. Получаем presigned URL
+      const { data } = await createUploadUrl({
+        variables: {
+          input: {
+            contentType: file.type,
+            fileName: file.name,
+            folder: "avatars",
+          },
+        },
+      });
+
+      const uploadData = data?.createUploadUrl;
+
+      if (!uploadData) {
+        throw new Error("Не удалось получить URL для загрузки");
+      }
+
+      // 2. Загружаем файл напрямую в R2
+      const uploadResponse = await fetch(uploadData.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Не удалось загрузить изображение");
+      }
+
+      // 3. Формируем URL файла
+      const avatarUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/files/${uploadData.key}`;
+
+      // 4. Сохраняем URL аватара в пользователя
+      const { data: updateData } = await updateUser({
+        variables: {
+          payload: {
+            id: user.id,
+            avatar: avatarUrl,
+          },
+        },
+      });
+
+      if (updateData?.updateUser) {
+        setUser(updateData.updateUser);
+
+        toast.success("Аватар успешно изменён");
+      }
+    } catch (error) {
+      console.error("Failed to update avatar:", error);
+
+      toast.error(
+        error instanceof Error ? error.message : "Не удалось изменить аватар",
+      );
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   return (
     <div className="p-4 md:p-6">
       <div className="max-w-2xl space-y-6">
@@ -175,22 +263,57 @@ export default function DashboardProfile() {
 
           <CardContent>
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage
-                  src={user?.avatar ?? undefined}
-                  alt={user?.name ?? user?.email ?? "Пользователь"}
-                />
+              <div className="relative">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage
+                    src={user?.avatar ?? undefined}
+                    alt={user?.name ?? user?.email ?? "Пользователь"}
+                  />
 
-                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-              </Avatar>
+                  <AvatarFallback className="text-lg">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
 
               <div>
                 <p className="font-medium">{user?.name || "Без имени"}</p>
 
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
+
+                <div className="mt-2">
+                  <input
+                    id="avatar"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={uploadingAvatar}
+                  />
+
+                  <label
+                    htmlFor="avatar"
+                    className={`
+    inline-flex h-9 items-center justify-center rounded-md
+    border border-input bg-background px-3
+    text-sm font-medium
+    transition-colors
+    hover:bg-accent hover:text-accent-foreground
+    ${uploadingAvatar ? "pointer-events-none opacity-50" : "cursor-pointer"}
+  `}
+                  >
+                    {uploadingAvatar ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Загрузка...
+                      </>
+                    ) : (
+                      "Изменить аватар"
+                    )}
+                  </label>
+                </div>
               </div>
             </div>
-
             <Separator className="my-6" />
 
             <form onSubmit={handleSubmit} className="space-y-5">
