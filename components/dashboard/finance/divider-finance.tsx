@@ -1,14 +1,14 @@
 import { Diamond } from "lucide-react";
 
 interface DividerProps {
-  type: "income" | "expense" | null;
+  transactionType: "income" | "expense" | null;
 }
 
-export default function DividerFinance({ type }: DividerProps) {
+export default function DividerFinance({ transactionType }: DividerProps) {
   const color =
-    type === "income"
+    transactionType === "income"
       ? "text-green-500"
-      : type === "expense"
+      : transactionType === "expense"
         ? "text-red-500"
         : "text-gray-400";
 

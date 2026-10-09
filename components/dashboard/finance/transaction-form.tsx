@@ -41,7 +41,7 @@ type FinanceCategory = {
 };
 
 interface TransactionFormProps {
-  type: "income" | "expense";
+  transactionType: "income" | "expense";
 }
 
 const incomeCategories: FinanceCategory[] = [
@@ -160,7 +160,9 @@ export const expenseCategories: FinanceCategory[] = [
   },
 ];
 
-export default function TransactionForm({ type }: TransactionFormProps) {
+export default function TransactionForm({
+  transactionType,
+}: TransactionFormProps) {
   const [isCategoryOpen, setIsCategoryOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<
     (typeof incomeCategories)[number] | null
@@ -178,9 +180,10 @@ export default function TransactionForm({ type }: TransactionFormProps) {
     setIsCategoryOpen(false);
   };
 
-  const categories = type === "income" ? incomeCategories : expenseCategories;
+  const categories =
+    transactionType === "income" ? incomeCategories : expenseCategories;
 
-  const isIncome = type === "income";
+  const isIncome = transactionType === "income";
 
   const color = {
     text: isIncome ? "text-green-500" : "text-red-500",
@@ -195,7 +198,7 @@ export default function TransactionForm({ type }: TransactionFormProps) {
 
   useEffect(() => {
     setSelectedCategory(null);
-  }, [type]);
+  }, [transactionType]);
 
   return (
     <div className="mt-6">

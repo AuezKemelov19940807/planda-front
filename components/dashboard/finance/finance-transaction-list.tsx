@@ -55,7 +55,7 @@ export default function FinanceTransactionList({
           type="button"
           onClick={action}
           disabled={!action}
-          className="flex items-center px-2 md:px-4 py-3.5 justify-between cursor-pointer"
+          className="flex items-center  w-full px-2 md:px-4 py-3.5 justify-between cursor-pointer"
         >
           <span className={color}>{title}</span>
           <span className="flex gap-x-2 items-center">

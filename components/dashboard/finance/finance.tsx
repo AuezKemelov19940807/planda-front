@@ -129,7 +129,7 @@ export default function Finance() {
   ];
 
   type TransactionType = "income" | "expense";
-
+  type ModalMode = "select" | "direct";
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const [profileType, setProfileType] = useState<"personal" | "business">(
@@ -139,8 +139,14 @@ export default function Finance() {
   const [transactionType, setTransactionType] =
     useState<TransactionType>("income");
 
-  const handleOpenModal = (type: TransactionType) => {
+  const [modalMode, setModalMode] = useState<ModalMode>("select");
+
+  const handleOpenModal = (
+    type: TransactionType,
+    mode: ModalMode = "direct",
+  ) => {
     setTransactionType(type);
+    setModalMode(mode);
     setIsModalOpen(true);
   };
 
@@ -194,7 +200,7 @@ export default function Finance() {
         action={
           <button
             className="cursor-pointer text-sm border border-transparent dark:border-yellow bg-[#FFF4D0] dark:bg-[#121211] text-black dark:text-yellow-400 rounded-md px-5 py-2"
-            onClick={handleOpenModal}
+            onClick={() => handleOpenModal("income", "select")}
           >
             + Қосу
           </button>
@@ -228,7 +234,9 @@ export default function Finance() {
       <MainModal open={isModalOpen} onClose={handleCloseModal}>
         <TransactionModalContent
           onClose={handleCloseModal}
-          initialType={transactionType}
+          transactionType={transactionType}
+          setTransactionType={setTransactionType}
+          modalMode={modalMode}
         />
       </MainModal>
     </div>

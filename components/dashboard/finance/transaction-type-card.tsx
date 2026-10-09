@@ -4,7 +4,7 @@ interface TransactionTypeCardProps {
   title: string;
   description: string;
   value: "income" | "expense";
-  selected: "income" | "expense" | null;
+  transactionType: "income" | "expense" | null;
   onClick: () => void;
   color: "green" | "red";
   Icon: LucideIcon;
@@ -14,12 +14,12 @@ export default function TransactionTypeCard({
   title,
   description,
   value,
-  selected,
+  transactionType,
   onClick,
   color,
   Icon,
 }: TransactionTypeCardProps) {
-  const isActive = selected === value;
+  const isActive = transactionType === value;
 
   return (
     <button
@@ -29,6 +29,8 @@ export default function TransactionTypeCard({
         relative
         flex
         items-center
+        justify-between
+        w-full
         bg-white
         gap-x-5
         p-5
