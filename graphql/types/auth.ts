@@ -1,11 +1,12 @@
 export interface SignInResponse {
   signIn: {
-    access_token: string;
-    name: string;
     id: string;
     email: string;
+    name: string;
     avatar: string;
     hasPassword: boolean;
+    isGoogleAccount: boolean;
+    access_token: string;
   };
 }
 
@@ -34,6 +35,7 @@ export interface GoogleSignInResponse {
     avatar: string | null;
     access_token: string;
     hasPassword: boolean;
+    isGoogleAccount: boolean;
   };
 }
 

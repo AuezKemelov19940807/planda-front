@@ -1,14 +1,9 @@
 "use client";
-
-import {
-  CalendarDays,
-  CheckSquare,
-  CircleDollarSign,
-  LayoutDashboard,
-  Settings,
-} from "lucide-react";
+import { Settings } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
+import NavigationMenu from "./navigation-menu";
 
 export function DashboardSidebar() {
   return (
@@ -19,28 +14,7 @@ export function DashboardSidebar() {
       </div>
 
       {/* Main navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        <Button variant="secondary" className="w-full justify-start gap-3">
-          <LayoutDashboard className="h-4 w-4" />
-          Обзор
-        </Button>
-
-        <Button variant="ghost" className="w-full justify-start gap-3">
-          <CheckSquare className="h-4 w-4" />
-          Задачи
-        </Button>
-
-        <Button variant="ghost" className="w-full justify-start gap-3">
-          <CalendarDays className="h-4 w-4" />
-          Календарь
-        </Button>
-
-        <Button variant="ghost" className="w-full justify-start gap-3">
-          <CircleDollarSign className="h-4 w-4" />
-          Финансы
-        </Button>
-      </nav>
-
+      <NavigationMenu />
       {/* Footer */}
       <div className="border-t p-4">
         <Button variant="ghost" className="w-full justify-start gap-3">

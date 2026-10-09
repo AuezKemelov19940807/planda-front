@@ -370,7 +370,15 @@ export default function DashboardProfile() {
           </CardHeader>
 
           <CardContent>
-            {user?.hasPassword ? (
+            {user?.isGoogleAccount ? (
+              <div>
+                <p className="font-medium">Пароль</p>
+                <p className="text-sm text-muted-foreground">
+                  Вы вошли через Google. Пароль PlanDa для этого аккаунта не
+                  установлен.
+                </p>
+              </div>
+            ) : (
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="font-medium">Пароль</p>
@@ -386,21 +394,13 @@ export default function DashboardProfile() {
                   Изменить пароль
                 </Button>
               </div>
-            ) : (
-              <div>
-                <p className="font-medium">Пароль</p>
-                <p className="text-sm text-muted-foreground">
-                  Вы вошли через Google. Пароль PlanDa для этого аккаунта не
-                  установлен.
-                </p>
-              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Change password dialog */}
-      {user?.hasPassword && (
+      {!user?.isGoogleAccount && (
         <Dialog
           open={isPasswordDialogOpen}
           onOpenChange={handlePasswordDialogChange}

@@ -71,6 +71,7 @@ export function LoginForm() {
         name: auth.name,
         avatar: auth.avatar,
         hasPassword: auth.hasPassword,
+        isGoogleAccount: auth.isGoogleAccount,
       });
 
       router.replace("/dashboard");
@@ -106,6 +107,7 @@ export function LoginForm() {
         name: auth.name,
         avatar: auth.avatar,
         hasPassword: auth.hasPassword,
+        isGoogleAccount: auth.isGoogleAccount,
       });
 
       router.replace("/dashboard");
@@ -193,7 +195,10 @@ export function LoginForm() {
 
             {error && (
               <p className="text-sm text-destructive">
-                Не удалось выполнить вход. Проверьте данные и попробуйте снова.
+                {error.message ===
+                "This account was created with Google. Please sign in with Google."
+                  ? "Этот аккаунт создан через Google. Войдите с помощью Google."
+                  : "Не удалось выполнить вход. Проверьте email и пароль."}
               </p>
             )}
 

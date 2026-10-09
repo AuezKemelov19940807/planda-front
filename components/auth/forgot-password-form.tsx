@@ -58,9 +58,11 @@ export default function ForgotPasswordForm() {
         `/auth/reset-password?email=${encodeURIComponent(normalizedEmail)}`,
       );
     } catch {
-      // Error is handled by Apollo state.
+      // Ошибка отображается через Apollo error
     }
   };
+
+  const isGoogleAccount = error?.message.includes("Google sign-in");
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
@@ -102,11 +104,19 @@ export default function ForgotPasswordForm() {
             </div>
 
             {error && (
-              <p className="text-sm text-destructive">
-                {error.message.includes("Google sign-in")
-                  ? "Этот аккаунт использует вход через Google. Войдите с помощью Google."
-                  : "Не удалось отправить код. Проверьте email и попробуйте снова."}
-              </p>
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm">
+                <p className="font-medium text-destructive">
+                  {isGoogleAccount
+                    ? "Восстановление пароля недоступно"
+                    : "Восстановление пароля временно недоступно"}
+                </p>
+
+                <p className="mt-1 text-muted-foreground">
+                  {isGoogleAccount
+                    ? "Этот аккаунт использует вход через Google. Войдите с помощью Google."
+                    : "Сейчас сервис восстановления пароля находится в режиме тестирования. Код восстановления можно отправить только на тестовый email владельца сервиса. Отправка кодов на другие адреса пока недоступна."}
+                </p>
+              </div>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>

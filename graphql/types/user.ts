@@ -4,6 +4,7 @@ interface User {
   name?: string | null;
   avatar?: string | null;
   hasPassword: boolean;
+  isGoogleAccount: boolean;
 }
 
 interface MeQuery {
