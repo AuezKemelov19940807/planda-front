@@ -306,7 +306,7 @@ export default function TransactionForm({
             />
           </span>
         </label>
-        <button className="bg-yellow w-full font-bold py-4 text-black rounded-lg">
+        <button className="bg-[#FFF4D0] w-full font-bold py-4 text-black rounded-lg">
           Сохранить
         </button>
       </form>

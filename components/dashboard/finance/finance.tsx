@@ -27,8 +27,24 @@ import { useClickOutside } from "@/lib/hooks/useClickOutside";
 
 import { TransactionModalContent } from "./transaction-modal-content";
 import MainModal from "../../ui/main-modal";
+import { FINANCE_SPACES } from "@/graphql/queries/finance/queries/financeSpaces";
+import {
+  FinanceSpaceResponseType,
+  FinanceSpaceType,
+} from "@/graphql/types/financeSpaces";
+import { useQuery } from "@apollo/client/react";
+import { li } from "framer-motion/client";
 
 export default function Finance() {
+  const { data, loading, error } = useQuery<FinanceSpaceResponseType>(
+    FINANCE_SPACES,
+    {
+      fetchPolicy: "network-only",
+    },
+  );
+
+  const spaces = data?.financeSpaces ?? [];
+
   const incomes = [
     {
       id: 1,
@@ -160,10 +176,23 @@ export default function Finance() {
     icon: LucideIcon;
   };
 
+  if (loading) {
+    return <p>Загрузка финансов...</p>;
+  }
+
+  if (error) {
+    return <p>Не удалось загрузить финансовые пространства.</p>;
+  }
+
   return (
     <div>
       <div className="flex items-center gap-x-5 mb-5">
-        <div className="flex gap-2">
+        {spaces.map((space) => (
+          <li className="list-none" key={space.id}>
+            <span className="uppercase"> {space.name} </span>
+          </li>
+        ))}
+        {/* <div className="flex gap-2">
           <button
             className={`
       cursor-pointer text-sm rounded-md px-5 py-2 transition
@@ -191,7 +220,7 @@ export default function Finance() {
           >
             ЮР. ЛИЦО
           </button>
-        </div>
+        </div> */}
       </div>
       <DashboardCard
         title="Каржы есебы"

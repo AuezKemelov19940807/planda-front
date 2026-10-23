@@ -25,7 +25,7 @@ export default function DashboardCard({
             <span className="w-6 h-6 md:w-12 md:h-12 border-2 relative bg-[#FFF4D0] dark:bg-black border-transparent dark:border-yellow flex items-center justify-center rounded-full">
               {icon}
             </span>
-            {title}
+            <span>{title}</span>
           </h2>
           {action}
         </div>

@@ -51,20 +51,19 @@ export default function FinanceTransactionList({
   return (
     <div className="px-2 md:px-5  flex flex-col flex-1">
       <div className="dark:bg-[#0D1012] border rounded-lg border-light-gray  dark:border-dark-gray">
-        <button
-          type="button"
-          onClick={action}
-          disabled={!action}
-          className="flex items-center  w-full px-2 md:px-4 py-3.5 justify-between cursor-pointer"
-        >
-          <span className={color}>{title}</span>
-          <span className="flex gap-x-2 items-center">
-            <span className="text-xs hidden md:inline-block md:text-sm text-zinc-600">
-              {totalLabel}
-            </span>
-            <span className={color}>{total}</span>
+        <div className="flex items-center w-full px-2 md:px-4 py-3.5 justify-between">
+          <span className={`${color} flex items-center gap-x-2`}>
+            <span>{title}</span>
           </span>
-        </button>
+
+          <button
+            type="button"
+            onClick={action}
+            className="cursor-pointer text-sm border border-transparent dark:border-yellow bg-[#FFF4D0] dark:bg-[#121211] text-black dark:text-yellow-400 rounded-md px-5 py-2"
+          >
+            + Қосу
+          </button>
+        </div>
         <ul>
           {items.map((item) => {
             const Icon = item.icon;
