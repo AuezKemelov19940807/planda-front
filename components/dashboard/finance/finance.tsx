@@ -29,11 +29,14 @@ import { TransactionModalContent } from "./transaction-modal-content";
 import MainModal from "../../ui/main-modal";
 import { FINANCE_SPACES } from "@/graphql/queries/finance/queries/financeSpaces";
 import {
+  CreateFinanceSpaceResponse,
+  CreateFinanceSpaceVariables,
   FinanceSpaceResponseType,
   FinanceSpaceType,
 } from "@/graphql/types/financeSpaces";
-import { useQuery } from "@apollo/client/react";
-import { li } from "framer-motion/client";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { div, li } from "framer-motion/client";
+import { CREATE_FINANCE_SPACE } from "@/graphql/queries/finance/mutations/createSpace";
 
 export default function Finance() {
   const { data, loading, error } = useQuery<FinanceSpaceResponseType>(
@@ -176,6 +179,37 @@ export default function Finance() {
     icon: LucideIcon;
   };
 
+  const [selectedSpaceId, setSelectedSpaceId] = useState<string | null>(null);
+
+  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
+
+  const [spaceName, setSpaceName] = useState("");
+
+  const selectedSpace =
+    spaces.find((space) => space.id === selectedSpaceId) ?? spaces[0];
+
+  const [
+    createFinanceSpace,
+    { loading: creatingSpace, error: createSpaceError },
+  ] = useMutation<CreateFinanceSpaceResponse, CreateFinanceSpaceVariables>(
+    CREATE_FINANCE_SPACE,
+    {
+      refetchQueries: [{ query: FINANCE_SPACES }],
+    },
+  );
+
+  const handleCreateSpace = async (name: string) => {
+    try {
+      const { data } = await createFinanceSpace({
+        variables: {
+          input: { name },
+        },
+      });
+    } catch (error) {
+      console.error("Ошибка создания пространства:", error);
+    }
+  };
+
   if (loading) {
     return <p>Загрузка финансов...</p>;
   }
@@ -187,11 +221,41 @@ export default function Finance() {
   return (
     <div>
       <div className="flex items-center gap-x-5 mb-5">
-        {spaces.map((space) => (
-          <li className="list-none" key={space.id}>
-            <span className="uppercase"> {space.name} </span>
-          </li>
-        ))}
+        <div className="flex items-center gap-x-3 mb-5">
+          {spaces.map((space) => {
+            const isActive = selectedSpace?.id === space.id;
+
+            return (
+              <button
+                key={space.id}
+                type="button"
+                onClick={() => setSelectedSpaceId(space.id)}
+                className={`cursor-pointer rounded-md px-5 py-2 text-sm uppercase transition ${
+                  isActive
+                    ? "bg-yellow text-black"
+                    : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-neutral-800"
+                }`}
+              >
+                {space.name}
+              </button>
+            );
+          })}
+          <button
+            onClick={() => {
+              setSpaceName("");
+              setIsCreateSpaceModalOpen(true);
+            }}
+            disabled={creatingSpace}
+          >
+            {creatingSpace ? "Создание..." : "Добавить пространство"}
+          </button>
+          {createSpaceError && (
+            <p className="text-red-500">
+              Не удалось создать финансовое пространство.
+            </p>
+          )}
+        </div>
+        {selectedSpace?.name}
         {/* <div className="flex gap-2">
           <button
             className={`
@@ -267,6 +331,74 @@ export default function Finance() {
           setTransactionType={setTransactionType}
           modalMode={modalMode}
         />
+      </MainModal>
+
+      <MainModal
+        open={isCreateSpaceModalOpen}
+        onClose={() => setIsCreateSpaceModalOpen(false)}
+      >
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+
+            const name = spaceName.trim();
+            if (!name || creatingSpace) return;
+
+            try {
+              await createFinanceSpace({
+                variables: {
+                  input: { name },
+                },
+                refetchQueries: [{ query: FINANCE_SPACES }],
+                awaitRefetchQueries: true,
+              });
+
+              setIsCreateSpaceModalOpen(false);
+              setSpaceName("");
+            } catch (error) {
+              console.error("Ошибка создания пространства:", error);
+            }
+          }}
+          className="w-full max-w-sm space-y-4 p-5"
+        >
+          <h2 className="text-lg font-semibold">Новое пространство</h2>
+
+          <div>
+            <label htmlFor="spaceName" className="mb-2 block text-sm">
+              Название
+            </label>
+
+            <input
+              id="spaceName"
+              type="text"
+              value={spaceName}
+              onChange={(e) => setSpaceName(e.target.value)}
+              placeholder="Например, Business"
+              maxLength={50}
+              required
+              autoFocus
+              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 outline-none focus:border-yellow dark:border-neutral-700"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsCreateSpaceModalOpen(false)}
+              className="rounded-md px-4 py-2 text-sm"
+            >
+              Отмена
+            </button>
+
+            <button
+              type="submit"
+              disabled={!spaceName.trim() || creatingSpace}
+              className="rounded-md bg-yellow px-4 py-2 text-sm text-black disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {creatingSpace ? "Создание..." : "Создать"}
+            </button>
+          </div>
+        </form>
       </MainModal>
     </div>
   );
