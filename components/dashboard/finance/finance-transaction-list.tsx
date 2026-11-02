@@ -71,7 +71,7 @@ export default function FinanceTransactionList({
             return (
               <li
                 key={item.id}
-                className="border-t border-b px-2 md:px-4 py-2.5 md:py-3.5 border-light-gray flex  justify-between dark:border-dark-gray"
+                className="border-t px-2 md:px-4 py-2.5 md:py-3.5 border-light-gray flex  justify-between dark:border-dark-gray"
               >
                 <div className="flex gap-x-4 items-center">
                   <span

@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Utensils,
   Wallet,
+  LoaderCircle,
 } from "lucide-react";
 import DashboardCard from "./dashboard-card";
 import FinanceTransactionList from "./finance-transaction-list";
@@ -241,13 +242,18 @@ export default function Finance() {
             );
           })}
           <button
+            className="cursor-pointer rounded-full border-2 w-8 h-8 text-2xl flex items-center justify-center"
             onClick={() => {
               setSpaceName("");
               setIsCreateSpaceModalOpen(true);
             }}
             disabled={creatingSpace}
           >
-            {creatingSpace ? "Создание..." : "Добавить пространство"}
+            {creatingSpace ? (
+              <LoaderCircle className="animate-spin" size={20} color="#000" />
+            ) : (
+              "+"
+            )}
           </button>
           {createSpaceError && (
             <p className="text-red-500">
@@ -255,38 +261,9 @@ export default function Finance() {
             </p>
           )}
         </div>
-        {selectedSpace?.name}
-        {/* <div className="flex gap-2">
-          <button
-            className={`
-      cursor-pointer text-sm rounded-md px-5 py-2 transition
-      ${
-        profileType === "personal"
-          ? "bg-yellow text-black"
-          : "bg-transparent text-gray-500 dark:text-gray-400"
-      }
-    `}
-            onClick={() => setProfileType("personal")}
-          >
-            ФИЗ. ЛИЦО
-          </button>
-
-          <button
-            className={`
-      cursor-pointer text-sm rounded-md px-5 py-2 transition
-      ${
-        profileType === "business"
-          ? "bg-yellow text-black"
-          : "bg-transparent text-gray-500 dark:text-gray-400"
-      }
-    `}
-            onClick={() => setProfileType("business")}
-          >
-            ЮР. ЛИЦО
-          </button>
-        </div> */}
       </div>
       <DashboardCard
+        selectedSpace={selectedSpace.name}
         title="Каржы есебы"
         icon={<Wallet className="dark:text-yellow  w-5 md:w-7 md:h-7 h-5" />}
         border
@@ -395,7 +372,11 @@ export default function Finance() {
               disabled={!spaceName.trim() || creatingSpace}
               className="rounded-md bg-yellow px-4 py-2 text-sm text-black disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {creatingSpace ? "Создание..." : "Создать"}
+              {creatingSpace ? (
+                <LoaderCircle className="animate-spin" size={20} color="#000" />
+              ) : (
+                "Создать"
+              )}
             </button>
           </div>
         </form>
