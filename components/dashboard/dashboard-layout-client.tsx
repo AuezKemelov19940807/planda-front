@@ -45,11 +45,11 @@ export function DashboardLayoutClient({
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <DashboardHeader user={user} />
+      {/* <DashboardHeader user={user} /> */}
 
       {/* Body */}
       <div className="flex flex-1">
-        <DashboardSidebar />
+        <DashboardSidebar user={user} />
 
         <main className="flex-1">{children}</main>
       </div>

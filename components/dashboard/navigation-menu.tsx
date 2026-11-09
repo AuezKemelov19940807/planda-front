@@ -38,7 +38,7 @@ export default function NavigationMenu() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 space-y-1 p-4">
+    <nav className="flex-1 space-y-1 text-white">
       {menuItems.map((item) => {
         const Icon = item.icon;
 
@@ -53,10 +53,9 @@ export default function NavigationMenu() {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              buttonVariants({
-                variant: isActive ? "secondary" : "ghost",
-              }),
-              "w-full justify-start gap-3",
+              buttonVariants({ variant: "ghost" }),
+              "w-full justify-start gap-3 py-5 text-white hover:bg-[#26382F]/80 hover:text-white",
+              isActive && "bg-[#26382F] hover:bg-[#26382F] text-white",
             )}
           >
             <Icon className="h-4 w-4" />
