@@ -46,6 +46,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-green: "#0f7a4f";
 }
 
 :root {
@@ -138,3 +139,116 @@ input::-ms-clear {
 input[type="password"]::-webkit-credentials-auto-fill-button {
   display: none;
 }
+
+/* .planola-calendar {
+  width: 100%;
+  max-width: 454px;
+  border: none !important;
+  border-radius: 20px;
+  padding: 18px;
+  background: white;
+  box-shadow:
+    0 15px 40px rgb(0 0 0 / 0.12),
+    0 4px 10px rgb(0 0 0 / 0.08);
+} */
+
+.planola-calendar.react-calendar {
+  width: 100% !important;
+  padding-bottom: 40px;
+  max-width: 100%;
+  border: none !important;
+}
+
+.planola-calendar .react-calendar__month-view__weekdays__weekday abbr {
+  color: #55625C !important;
+  text-decoration: none !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  cursor: default;
+}
+
+.planola-calendar .react-calendar__tile--now {
+  background: #E5F2EC !important;
+  color: #0B6B45 !important;
+ border-radius: 5px !important;
+}
+
+/* Hover для сегодняшнего дня */
+.planola-calendar .react-calendar__tile--now:hover {
+  background: #D5EADF !important;
+  border-radius: 5px !important;
+}
+
+/* Выбранный день сохраняет основной зелёный */
+.planola-calendar .react-calendar__tile--active,
+.planola-calendar .react-calendar__tile--active:hover {
+  background: #0B6B45 !important;
+  color: #fff !important;
+  border-radius: 5px !important;
+
+}
+
+.planola-calendar .react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.planola-calendar .react-calendar__navigation button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 12px !important;
+
+  color: #55625C !important;
+  font-size: 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+
+
+/* Hover */
+.planola-calendar .react-calendar__navigation button {
+  background: #E5F2EC !important;
+  color: #0B6B45 !important;
+}
+
+/* Нажатие */
+.planola-calendar .react-calendar__navigation button:active {
+  background: #D5EADF !important;
+  transform: scale(0.95);
+}
+
+/* Неактивные кнопки */
+.planola-calendar .react-calendar__navigation button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+
+
+.planola-calendar .react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.planola-calendar .react-calendar__navigation__label {
+  flex-grow: 1 !important;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #26352E;
+ 
+
+}
+
+.planola-calendar .react-calendar__navigation__label {
+  pointer-events: none !important;
+  cursor: default !important;
+
+}
+

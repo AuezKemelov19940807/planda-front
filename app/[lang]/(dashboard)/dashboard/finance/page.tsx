@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function FinancePage() {
   return (
-    <div className="p-4 md:p-6">
+    <div className="">
       <Finance />
     </div>
   );

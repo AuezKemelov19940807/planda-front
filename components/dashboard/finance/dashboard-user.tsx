@@ -50,21 +50,26 @@ export function DashboardUser({ user }: DashboardHeaderProps) {
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={loading}
-        className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-medium outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex h-10  gap-2 w-full rounded-md px-2 text-sm font-medium outline-none transition-colors hover:bg-[#26382F]/80  focus-visible:ring-2 focus-visible:ring-ring"
       >
-        {user?.avatar ? (
-          <img
-            src={user.avatar}
-            alt={user.name ?? user.email}
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : (
-          <CircleUserRound className="h-8 w-8" />
-        )}
+        <div className="">
+          <span className="flex gap-x-2.5">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name ?? user.email}
+                className="min-w-10 min-h-10 h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <CircleUserRound className="h-8 w-8" />
+            )}
 
-        <span className="hidden md:block">
-          {user?.name ?? user?.email ?? "Пользователь"}
-        </span>
+            <span className="flex flex-col text-left w-full">
+              <span>{user?.name ?? user?.email ?? "Пользователь"}</span>
+              <span className="opacity-50">Personal</span>
+            </span>
+          </span>
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">

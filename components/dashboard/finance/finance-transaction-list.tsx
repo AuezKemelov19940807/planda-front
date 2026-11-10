@@ -49,55 +49,65 @@ export default function FinanceTransactionList({
   action,
 }: FinanceTransactionListProps) {
   return (
-    <div className="px-2 md:px-5  flex flex-col flex-1">
+    <div className=" flex flex-col flex-1 w-full">
       <div className="dark:bg-[#0D1012] border rounded-lg border-light-gray  dark:border-dark-gray">
         <div className="flex items-center w-full px-2 md:px-4 py-3.5 justify-between">
-          <span className={`${color} flex items-center gap-x-2`}>
+          <span className="font-bold flex text-lg items-center gap-x-2">
             <span>{title}</span>
           </span>
 
           <button
             type="button"
             onClick={action}
-            className="cursor-pointer text-sm border border-transparent dark:border-yellow bg-[#FFF4D0] dark:bg-[#121211] text-black dark:text-yellow-400 rounded-md px-5 py-2"
+            className="text-green-700 font-semibold"
           >
             + Қосу
           </button>
         </div>
         <ul>
-          {items.map((item) => {
-            const Icon = item.icon;
+          {items.length > 0 ? (
+            items.map((item) => {
+              const Icon = item.icon;
 
-            return (
-              <li
-                key={item.id}
-                className="border-t px-2 md:px-4 py-2.5 md:py-3.5 border-light-gray flex  justify-between dark:border-dark-gray"
-              >
-                <div className="flex gap-x-4 items-center">
-                  <span
-                    className={`${iconBg} flex w-8 h-8 md:h-10 md:w-10 items-center justify-center rounded-full`}
-                  >
-                    <Icon className="w-4 h-4 md:h-5 md:w-5 text-white" />
-                  </span>
-                  <span className="flex flex-col text-sm md:text-base">
-                    <span>{item.title}</span>
-
-                    <span className="text-zinc-600 text-xs md:text-sm">
-                      {item.description}
+              return (
+                <li
+                  key={item.id}
+                  className="border-t px-2 md:px-4 py-2.5 md:py-3.5 border-light-gray flex justify-between dark:border-dark-gray"
+                >
+                  <div className="flex gap-x-4 items-center">
+                    <span
+                      className={`${iconBg} flex w-8 h-8 md:h-10 md:w-10 items-center justify-center rounded-full`}
+                    >
+                      <Icon className="w-4 h-4 md:h-5 md:w-5 text-white" />
                     </span>
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="pr-2 md:pr-5 text-sm md:text-base">
-                    {item.amount}{" "}
-                  </span>
-                  <span className="flex justify-end text-zinc-600 text-xs md:text-sm">
-                    {item.time}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
+
+                    <span className="flex flex-col text-sm md:text-base">
+                      <span>{item.title}</span>
+                      <span className="text-zinc-600 text-xs md:text-sm">
+                        {item.description}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="pr-2 md:pr-5 text-sm md:text-base">
+                      {item.amount}
+                    </span>
+                    <span className="flex justify-end text-zinc-600 text-xs md:text-sm">
+                      {item.time}
+                    </span>
+                  </div>
+                </li>
+              );
+            })
+          ) : (
+            <li className="border-t border-light-gray dark:border-dark-gray py-8 px-4 text-center">
+              <p className="text-sm text-zinc-500">Әзірге операциялар жоқ</p>
+              <p className="text-xs text-zinc-400 mt-1">
+                Жаңа операция қосу үшін «+ Қосу» батырмасын басыңыз
+              </p>
+            </li>
+          )}
         </ul>
       </div>
     </div>

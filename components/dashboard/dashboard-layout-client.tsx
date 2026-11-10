@@ -9,6 +9,10 @@ import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { ME_QUERY } from "@/graphql/queries/me";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "@/i18n/navigation";
+import { ModeToggle } from "../common/mode-toggle";
+import { LangToggle } from "../common/lang-toggle";
+import { Bell } from "lucide-react";
+import Notification from "../common/notification";
 
 export function DashboardLayoutClient({
   children,
@@ -50,8 +54,15 @@ export function DashboardLayoutClient({
       {/* Body */}
       <div className="flex flex-1">
         <DashboardSidebar user={user} />
+        <div className="p-10 w-full">
+          <div className="pb-7 flex items-end gap-x-3 justify-end">
+            <ModeToggle />
+            <Notification />
+            <LangToggle />
+          </div>
 
-        <main className="flex-1">{children}</main>
+          <main className="flex-1">{children}</main>
+        </div>
       </div>
     </div>
   );

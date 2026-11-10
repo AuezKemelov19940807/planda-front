@@ -1,18 +1,19 @@
 "use client";
 import {
-  ArrowRight,
+  ArrowDownRight,
+  ArrowUpRight,
   BriefcaseBusiness,
   Car,
   Laptop,
   ShoppingCart,
   Utensils,
   Wallet,
-  LoaderCircle,
 } from "lucide-react";
-import DashboardCard from "./dashboard-card";
-import FinanceTransactionList from "./finance-transaction-list";
-import { useState } from "react";
 
+import FinanceTransactionList from "./finance-transaction-list";
+import { useEffect, useRef, useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import {
   Briefcase,
   TrendingUp,
@@ -24,20 +25,30 @@ import {
   BadgeDollarSign,
   LucideIcon,
 } from "lucide-react";
-import { useClickOutside } from "@/lib/hooks/useClickOutside";
 
 import { TransactionModalContent } from "./transaction-modal-content";
 import MainModal from "../../ui/main-modal";
 import { FINANCE_SPACES } from "@/graphql/queries/finance/queries/financeSpaces";
+import { FinanceSpaceResponseType } from "@/graphql/types/financeSpaces";
+import { useQuery } from "@apollo/client/react";
+import { CgArrowBottomLeft } from "react-icons/cg";
+import { useLocale } from "next-intl";
+import DashboardCalendar from "./dashboard-calendar";
+import { TRANSACTIONS } from "@/graphql/queries/finance/queries/transactions";
+import { div } from "framer-motion/client";
 import {
-  CreateFinanceSpaceResponse,
-  CreateFinanceSpaceVariables,
-  FinanceSpaceResponseType,
-  FinanceSpaceType,
-} from "@/graphql/types/financeSpaces";
-import { useMutation, useQuery } from "@apollo/client/react";
-import { div, li } from "framer-motion/client";
-import { CREATE_FINANCE_SPACE } from "@/graphql/queries/finance/mutations/createSpace";
+  TransactionProps,
+  TransactionsResponse,
+} from "@/graphql/queries/finance/types/transaction";
+
+interface SpaceProps {
+  id: string;
+  name: string;
+}
+
+type ValuePiece = Date | null;
+
+type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export default function Finance() {
   const { data, loading, error } = useQuery<FinanceSpaceResponseType>(
@@ -47,7 +58,73 @@ export default function Finance() {
     },
   );
 
-  const spaces = data?.financeSpaces ?? [];
+  const spaceItems = data?.financeSpaces ?? [];
+
+  const [selectedSpaceID, setSelectedSpaceID] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const selectedSpace =
+    spaceItems.find((space) => space.id === selectedSpaceID) ??
+    spaceItems[0] ??
+    null;
+
+  const handleSetSelectedSpaceID = (id: string) => setSelectedSpaceID(id);
+  const [value, onChange] = useState<Value>(new Date());
+
+  type TransactionType = "income" | "expense";
+  type ModalMode = "select" | "direct";
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [profileType, setProfileType] = useState<"personal" | "business">(
+    "personal",
+  );
+
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>("income");
+
+  const [modalMode, setModalMode] = useState<ModalMode>("select");
+
+  const handleOpenModal = (
+    type: TransactionType,
+    mode: ModalMode = "direct",
+  ) => {
+    setTransactionType(type);
+    setModalMode(mode);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  type IncomeCategory = {
+    id: number;
+    title: string;
+    icon: LucideIcon;
+  };
+
+  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
+
+  // const [
+  //   createFinanceSpace,
+  //   { loading: creatingSpace, error: createSpaceError },
+  // ] = useMutation<CreateFinanceSpaceResponse, CreateFinanceSpaceVariables>(
+  //   CREATE_FINANCE_SPACE,
+  //   {
+  //     refetchQueries: [{ query: FINANCE_SPACES }],
+  //   },
+  // );
+
+  // const handleCreateSpace = async (name: string) => {
+  //   try {
+  //     const { data } = await createFinanceSpace({
+  //       variables: {
+  //         input: { name },
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Ошибка создания пространства:", error);
+  //   }
+  // };
 
   const incomes = [
     {
@@ -148,68 +225,84 @@ export default function Finance() {
     },
   ];
 
-  type TransactionType = "income" | "expense";
-  type ModalMode = "select" | "direct";
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [profileType, setProfileType] = useState<"personal" | "business">(
-    "personal",
-  );
-
-  const [transactionType, setTransactionType] =
-    useState<TransactionType>("income");
-
-  const [modalMode, setModalMode] = useState<ModalMode>("select");
-
-  const handleOpenModal = (
-    type: TransactionType,
-    mode: ModalMode = "direct",
-  ) => {
-    setTransactionType(type);
-    setModalMode(mode);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  type IncomeCategory = {
-    id: number;
-    title: string;
-    icon: LucideIcon;
-  };
-
-  const [selectedSpaceId, setSelectedSpaceId] = useState<string | null>(null);
-
-  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
-
-  const [spaceName, setSpaceName] = useState("");
-
-  const selectedSpace =
-    spaces.find((space) => space.id === selectedSpaceId) ?? spaces[0];
-
-  const [
-    createFinanceSpace,
-    { loading: creatingSpace, error: createSpaceError },
-  ] = useMutation<CreateFinanceSpaceResponse, CreateFinanceSpaceVariables>(
-    CREATE_FINANCE_SPACE,
-    {
-      refetchQueries: [{ query: FINANCE_SPACES }],
+  const {
+    data: transactionsData,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useQuery<TransactionsResponse>(TRANSACTIONS, {
+    variables: {
+      financeSpaceId: selectedSpace?.id ?? "",
     },
+    skip: !selectedSpace?.id,
+  });
+
+  const transactions = transactionsData?.transactions ?? [];
+
+  const income = transactions.reduce(
+    (total, transaction) =>
+      transaction.type === "INCOME" ? total + transaction.amount : total,
+    0,
   );
 
-  const handleCreateSpace = async (name: string) => {
-    try {
-      const { data } = await createFinanceSpace({
-        variables: {
-          input: { name },
-        },
-      });
-    } catch (error) {
-      console.error("Ошибка создания пространства:", error);
+  const expense = transactions.reduce(
+    (total, transaction) =>
+      transaction.type === "EXPENSE" ? total + transaction.amount : total,
+    0,
+  );
+
+  const balance = income - expense;
+
+  // Получаем дату в формате YYYY-MM-DD
+  const getDateKey = (date: Date | string) => {
+    if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
     }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) return "";
+
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   };
+
+  const selectedDateKey = getDateKey(selectedDate);
+
+  // Транзакции выбранного дня
+  const dailyTransactions = transactions.filter(
+    (transaction) => getDateKey(transaction.date) === selectedDateKey,
+  );
+
+  const dailyOperationCount = dailyTransactions.length;
+
+  // Доходы выбранного дня
+  const dailyIncomes = dailyTransactions.filter(
+    (transaction) => transaction.type === "INCOME",
+  );
+
+  // Расходы выбранного дня
+  const dailyExpenses = dailyTransactions.filter(
+    (transaction) => transaction.type === "EXPENSE",
+  );
+
+  // Суммы за выбранный день
+  const dailyIncome = dailyIncomes.reduce(
+    (total, transaction) => total + transaction.amount,
+    0,
+  );
+
+  const dailyExpense = dailyExpenses.reduce(
+    (total, transaction) => total + transaction.amount,
+    0,
+  );
+
+  const formattedDate = selectedDate.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+  });
 
   if (loading) {
     return <p>Загрузка финансов...</p>;
@@ -221,8 +314,32 @@ export default function Finance() {
 
   return (
     <div>
-      <div className="flex items-center gap-x-5 mb-5">
-        <div className="flex items-center gap-x-3 mb-5">
+      <div className="flex flex-col gap-x-5 mb-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-2xl">Финансы</h2>
+          <div className="bg-[#E3E9E5] flex gap-x-2.5 p-1 rounded-sm">
+            {spaceItems.map((spaceItem) => {
+              const activeSpaceID = selectedSpace?.id === spaceItem.id;
+
+              return (
+                <button
+                  type="button"
+                  key={spaceItem.id}
+                  className={`${activeSpaceID ? "bg-white" : "bg-transparent"}  cursor-pointer rounded-sm py-2.5 px-5`}
+                  onClick={() => handleSetSelectedSpaceID(spaceItem.id)}
+                >
+                  <span>{spaceItem.name}</span>
+                </button>
+              );
+            })}
+
+            {/* <button className=" cursor-pointer py-2.5 px-5 rounded-sm">
+              Business
+            </button> */}
+          </div>
+        </div>
+
+        {/* <div className="flex items-center gap-x-3 mb-5">
           {spaces.map((space) => {
             const isActive = selectedSpace?.id === space.id;
 
@@ -260,9 +377,9 @@ export default function Finance() {
               Не удалось создать финансовое пространство.
             </p>
           )}
-        </div>
+        </div> */}
       </div>
-      <DashboardCard
+      {/* <DashboardCard
         selectedSpace={selectedSpace.name}
         title="Каржы есебы"
         icon={<Wallet className="dark:text-yellow  w-5 md:w-7 md:h-7 h-5" />}
@@ -278,15 +395,6 @@ export default function Finance() {
       >
         <div className="flex flex-col gap-y-2">
           <FinanceTransactionList
-            title="Табыстар"
-            totalLabel="Күндік жалпы табыс:"
-            total="650 000 тг"
-            color="text-green-500"
-            iconBg="bg-green-500"
-            items={incomes}
-            action={() => handleOpenModal("income")}
-          />
-          <FinanceTransactionList
             title="Шығындар"
             totalLabel="Күндік жалпы шығын:"
             total="125 000 тг"
@@ -300,7 +408,145 @@ export default function Finance() {
             <ArrowRight className="text-yellow" />
           </button>
         </div>
-      </DashboardCard>
+      </DashboardCard> */}
+      <div className="flex gap-x-6">
+        <div className="max-w-3/5 w-full">
+          <div className="bg-[#0f7a4f] z-10 overflow-hidden  relative mb-6 rounded-lg p-7.5 text-white">
+            <div className="absolute w-90 h-90 -z-10 -top-30.5 -right-28.5 ">
+              <img src={"/card-finance.png"} />
+            </div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex gap-x-2.5 items-center">
+                <span className="text-lg font-semibold">Каржы есебы:</span>
+                <span className="py-1.5 px-4 bg-[#3A926F] rounded-full">
+                  {selectedSpace?.name}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="bg-white cursor-pointer py-2 px-4 rounded-full text-black"
+                onClick={() => handleOpenModal("income", "select")}
+              >
+                + Косу
+              </button>
+            </div>
+            <div className="flex items-center gap-x-8 justify-between">
+              <div className="flex  w-full max-w-84.5 flex-col gap-y-4.5">
+                <div className="flex flex-col gap-y-1">
+                  <span className="text-sm opacity-80">Ағымдағы баланс</span>
+                  <span className="font-extrabold text-6xl">{balance} тг</span>
+                </div>
+                <div className="flex flex-col gap-y-2">
+                  <span className="w-full flex gap-x-1 items-center">
+                    <span className="rounded-l-full h-2 flex-4/5 bg-white"></span>
+                    <span className="rounded-r-full h-2  flex-1/5  bg-red-200"></span>
+                  </span>
+                  <span className="text-sm opacity-80">
+                    Табыстың 6%-ы жұмсалды
+                  </span>
+                </div>
+              </div>
+              <div className="flex  flex-col w-full max-w-80 gap-y-2.5">
+                <div className="bg-[#3A926F] relative -z-20 w-full flex items-center gap-x-3 p-4 rounded-lg">
+                  <span className="flex items-center justify-center bg-white rounded-full w-10 h-10">
+                    <ArrowUpRight color="#0f7a4f" />
+                  </span>
+                  <span className="flex flex-col gap-y-0.5">
+                    <span className="text-sm">Табыс</span>
+                    <span className="text-2xl font-bold">
+                      {dailyIncome.toLocaleString("ru-RU")} тг
+                    </span>
+                  </span>
+                </div>
+                <div className="bg-[#3A926F] w-full relative -z-20 flex items-center gap-x-3 p-4 rounded-lg">
+                  <span className="flex items-center justify-center bg-white rounded-full w-10 h-10">
+                    <ArrowDownRight color="#932B12" />
+                  </span>
+                  <span className="flex flex-col gap-y-0.5">
+                    <span className="text-sm">Шығын</span>
+                    <span className="text-2xl font-bold">
+                      {dailyExpense.toLocaleString("ru-RU")} тг
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="flex gap-x-6">
+              <FinanceTransactionList
+                title="Табыстар"
+                totalLabel="Күндік жалпы табыс:"
+                total={`${dailyIncome.toLocaleString("ru-RU")} тг`}
+                color="text-green-500"
+                iconBg="bg-green-500"
+                items={dailyIncomes.map((transaction) => ({
+                  id: transaction.id,
+                  icon: Wallet,
+                  title: "Доход",
+                  description: transaction.comment ?? "",
+                  amount: `${transaction.amount.toLocaleString("ru-RU")} тг`,
+                  time: new Date(transaction.date).toLocaleTimeString("ru-RU", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                }))}
+                action={() => handleOpenModal("income")}
+              />
+
+              <FinanceTransactionList
+                title="Шығындар"
+                totalLabel="Күндік жалпы шығын:"
+                total={`${dailyExpense.toLocaleString("ru-RU")} тг`}
+                color="text-red-500"
+                iconBg="bg-red-500"
+                items={dailyExpenses.map((transaction) => ({
+                  id: transaction.id,
+                  icon: Wallet,
+                  title: "Расход",
+                  description: transaction.comment ?? "",
+                  amount: `${transaction.amount.toLocaleString("ru-RU")} тг`,
+                  time: new Date(transaction.date).toLocaleTimeString("ru-RU", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                }))}
+                action={() => handleOpenModal("expense")}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Calendar */}
+        <div className="flex-2/5 h-fit dark:bg-[#0D1012] border rounded-lg border-light-gray  dark:border-dark-gray p-5">
+          <DashboardCalendar value={selectedDate} onChange={setSelectedDate} />
+          <div className="border-t pt-4 flex flex-col gap-y-2.5">
+            <div className="font-extrabold">
+              <span>{formattedDate} · </span>
+              <span>{dailyOperationCount} операций</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#0B6B45]">
+                {" "}
+                Табыс +{dailyIncome.toLocaleString("ru-RU")} тг
+              </span>
+              <span className="text-red-700">
+                Шығын −{dailyExpense.toLocaleString("ru-RU")} тг
+              </span>
+            </div>
+            <div className="flex gap-x-4">
+              <span className="flex gap-x-2.5 items-center">
+                <span className="w-2.5 h-2.5 bg-[#0B6B45] rounded-full flex items-center justify-center"></span>
+                <span className="text-[#0B6B45]">Табыс</span>
+              </span>
+              <span className="flex gap-x-2.5 items-center">
+                <span className="w-2.5 h-2.5 bg-red-700 rounded-full flex items-center justify-center"></span>
+                <span className="text-red-700">Шығын</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <MainModal open={isModalOpen} onClose={handleCloseModal}>
         <TransactionModalContent
           onClose={handleCloseModal}
@@ -310,7 +556,7 @@ export default function Finance() {
         />
       </MainModal>
 
-      <MainModal
+      {/* <MainModal
         open={isCreateSpaceModalOpen}
         onClose={() => setIsCreateSpaceModalOpen(false)}
       >
@@ -380,7 +626,7 @@ export default function Finance() {
             </button>
           </div>
         </form>
-      </MainModal>
+      </MainModal> */}
     </div>
   );
 }
