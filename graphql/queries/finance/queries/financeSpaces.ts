@@ -5,6 +5,7 @@ export const FINANCE_SPACES = gql`
     financeSpaces {
       id
       name
+      slug
     }
   }
 `;

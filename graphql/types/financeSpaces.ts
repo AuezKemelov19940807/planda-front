@@ -5,6 +5,7 @@ export interface FinanceSpaceResponseType {
 export interface FinanceSpaceType {
   id: string;
   name: string;
+  slug: string;
 }
 
 export type CreateFinanceSpaceResponse = {

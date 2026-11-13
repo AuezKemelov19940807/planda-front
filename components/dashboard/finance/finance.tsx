@@ -4,7 +4,11 @@ import {
   ArrowUpRight,
   BriefcaseBusiness,
   Car,
+  CirclePlus,
+  EllipsisVertical,
   Laptop,
+  Settings,
+  Settings2,
   ShoppingCart,
   Utensils,
   Wallet,
@@ -40,6 +44,7 @@ import {
   TransactionProps,
   TransactionsResponse,
 } from "@/graphql/queries/finance/types/transaction";
+import { Link, useRouter } from "@/i18n/navigation";
 
 interface SpaceProps {
   id: string;
@@ -59,6 +64,7 @@ export default function Finance() {
   );
 
   const spaceItems = data?.financeSpaces ?? [];
+  const router = useRouter();
 
   const [selectedSpaceID, setSelectedSpaceID] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -66,6 +72,8 @@ export default function Finance() {
     spaceItems.find((space) => space.id === selectedSpaceID) ??
     spaceItems[0] ??
     null;
+
+  const [openMenuID, setOpenMenuID] = useState<string | null>(null);
 
   const handleSetSelectedSpaceID = (id: string) => setSelectedSpaceID(id);
   const [value, onChange] = useState<Value>(new Date());
@@ -304,6 +312,11 @@ export default function Finance() {
     month: "long",
   });
 
+  const expensePercentage =
+    income > 0 ? Math.min((expense / income) * 100, 100) : 0;
+
+  const remainingPercentage = 100 - expensePercentage;
+
   if (loading) {
     return <p>Загрузка финансов...</p>;
   }
@@ -316,26 +329,54 @@ export default function Finance() {
     <div>
       <div className="flex flex-col gap-x-5 mb-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-2xl">Финансы</h2>
-          <div className="bg-[#E3E9E5] flex gap-x-2.5 p-1 rounded-sm">
-            {spaceItems.map((spaceItem) => {
-              const activeSpaceID = selectedSpace?.id === spaceItem.id;
+          <div className="flex items-center gap-x-2.5">
+            <h2 className="font-semibold text-2xl">Финансы</h2>
+            <Link
+              href={`/dashboard/finance/${selectedSpace.slug}/settings`}
+              className="cursor-pointer"
+            >
+              <Settings />
+            </Link>
+          </div>
+          <div className="flex items-center gap-x-5">
+            <div className="bg-[#E3E9E5] flex gap-x-2.5 p-1 rounded-sm">
+              {spaceItems.map((spaceItem) => {
+                const activeSpaceID = selectedSpace?.id === spaceItem.id;
 
-              return (
-                <button
-                  type="button"
-                  key={spaceItem.id}
-                  className={`${activeSpaceID ? "bg-white" : "bg-transparent"}  cursor-pointer rounded-sm py-2.5 px-5`}
-                  onClick={() => handleSetSelectedSpaceID(spaceItem.id)}
-                >
-                  <span>{spaceItem.name}</span>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    type="button"
+                    key={spaceItem.id}
+                    className={`${activeSpaceID ? "bg-white" : "bg-transparent"}  cursor-pointer flex items-center gap-x-2.5 rounded-sm py-2.5 pl-4 pr-2.5`}
+                    onClick={() => handleSetSelectedSpaceID(spaceItem.id)}
+                  >
+                    <span>{spaceItem.name}</span>
 
-            {/* <button className=" cursor-pointer py-2.5 px-5 rounded-sm">
+                    <span
+                      className="cursor-pointer"
+                      onClick={() =>
+                        setOpenMenuID((prev) =>
+                          prev === spaceItem.id ? null : spaceItem.id,
+                        )
+                      }
+                    >
+                      <EllipsisVertical size={18} />
+                    </span>
+                  </button>
+                );
+              })}
+
+              {/* <button className=" cursor-pointer py-2.5 px-5 rounded-sm">
               Business
             </button> */}
+            </div>
+            <button
+              className="cursor-pointer"
+              type="button"
+              onClick={() => router.push("/dashboard/finance/spaces/new")}
+            >
+              <CirclePlus color="#0f7a4f" />
+            </button>
           </div>
         </div>
 
@@ -438,11 +479,19 @@ export default function Finance() {
                 </div>
                 <div className="flex flex-col gap-y-2">
                   <span className="w-full flex gap-x-1 items-center">
-                    <span className="rounded-l-full h-2 flex-4/5 bg-white"></span>
-                    <span className="rounded-r-full h-2  flex-1/5  bg-red-200"></span>
+                    <span
+                      className="rounded-l-full h-2 bg-white"
+                      style={{ flex: remainingPercentage }}
+                    />
+
+                    <span
+                      className="rounded-r-full h-2 bg-red-200"
+                      style={{ flex: expensePercentage }}
+                    />
                   </span>
+
                   <span className="text-sm opacity-80">
-                    Табыстың 6%-ы жұмсалды
+                    Табыстың {Math.round(expensePercentage)}%-ы жұмсалды
                   </span>
                 </div>
               </div>
