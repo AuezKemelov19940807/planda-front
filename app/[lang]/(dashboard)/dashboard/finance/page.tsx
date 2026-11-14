@@ -1,6 +1,7 @@
 import Finance from "@/components/dashboard/finance/finance";
 import { FINANCE_SPACES } from "@/graphql/queries/finance/queries/financeSpaces";
 import { FinanceSpaceType } from "@/graphql/types/financeSpaces";
+import { FinanceSpaceProvider } from "@/lib/contexts/finance-space-context";
 import { useQuery } from "@apollo/client/react";
 import { Metadata } from "next";
 
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function FinancePage() {
   return (
-    <div className="">
+    <FinanceSpaceProvider>
       <Finance />
-    </div>
+    </FinanceSpaceProvider>
   );
 }

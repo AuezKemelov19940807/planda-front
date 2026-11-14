@@ -4,19 +4,16 @@ import {
   ArrowUpRight,
   BriefcaseBusiness,
   Car,
-  CirclePlus,
-  EllipsisVertical,
   Laptop,
   Settings,
-  Settings2,
   ShoppingCart,
   Utensils,
   Wallet,
 } from "lucide-react";
 
 import FinanceTransactionList from "./finance-transaction-list";
-import { useEffect, useRef, useState } from "react";
-import Calendar from "react-calendar";
+import { useState } from "react";
+
 import "react-calendar/dist/Calendar.css";
 import {
   Briefcase,
@@ -35,56 +32,27 @@ import MainModal from "../../ui/main-modal";
 import { FINANCE_SPACES } from "@/graphql/queries/finance/queries/financeSpaces";
 import { FinanceSpaceResponseType } from "@/graphql/types/financeSpaces";
 import { useQuery } from "@apollo/client/react";
-import { CgArrowBottomLeft } from "react-icons/cg";
-import { useLocale } from "next-intl";
+
 import DashboardCalendar from "./dashboard-calendar";
 import { TRANSACTIONS } from "@/graphql/queries/finance/queries/transactions";
-import { div } from "framer-motion/client";
-import {
-  TransactionProps,
-  TransactionsResponse,
-} from "@/graphql/queries/finance/types/transaction";
+
+import { TransactionsResponse } from "@/graphql/queries/finance/types/transaction";
 import { Link, useRouter } from "@/i18n/navigation";
 
-interface SpaceProps {
-  id: string;
-  name: string;
-}
+import FinanceSpace from "./finance-space";
+import { useFinanceTransactions } from "@/lib/hooks/use-finance-transactions";
+import { useFinanceSpace } from "@/lib/contexts/finance-space-context";
 
 type ValuePiece = Date | null;
 
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export default function Finance() {
-  const { data, loading, error } = useQuery<FinanceSpaceResponseType>(
-    FINANCE_SPACES,
-    {
-      fetchPolicy: "network-only",
-    },
-  );
-
-  const spaceItems = data?.financeSpaces ?? [];
-  const router = useRouter();
-
-  const [selectedSpaceID, setSelectedSpaceID] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const selectedSpace =
-    spaceItems.find((space) => space.id === selectedSpaceID) ??
-    spaceItems[0] ??
-    null;
-
-  const [openMenuID, setOpenMenuID] = useState<string | null>(null);
-
-  const handleSetSelectedSpaceID = (id: string) => setSelectedSpaceID(id);
-  const [value, onChange] = useState<Value>(new Date());
 
   type TransactionType = "income" | "expense";
   type ModalMode = "select" | "direct";
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [profileType, setProfileType] = useState<"personal" | "business">(
-    "personal",
-  );
 
   const [transactionType, setTransactionType] =
     useState<TransactionType>("income");
@@ -109,30 +77,6 @@ export default function Finance() {
     title: string;
     icon: LucideIcon;
   };
-
-  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false);
-
-  // const [
-  //   createFinanceSpace,
-  //   { loading: creatingSpace, error: createSpaceError },
-  // ] = useMutation<CreateFinanceSpaceResponse, CreateFinanceSpaceVariables>(
-  //   CREATE_FINANCE_SPACE,
-  //   {
-  //     refetchQueries: [{ query: FINANCE_SPACES }],
-  //   },
-  // );
-
-  // const handleCreateSpace = async (name: string) => {
-  //   try {
-  //     const { data } = await createFinanceSpace({
-  //       variables: {
-  //         input: { name },
-  //       },
-  //     });
-  //   } catch (error) {
-  //     console.error("Ошибка создания пространства:", error);
-  //   }
-  // };
 
   const incomes = [
     {
@@ -237,13 +181,9 @@ export default function Finance() {
     data: transactionsData,
     loading: transactionsLoading,
     error: transactionsError,
-  } = useQuery<TransactionsResponse>(TRANSACTIONS, {
-    variables: {
-      financeSpaceId: selectedSpace?.id ?? "",
-    },
-    skip: !selectedSpace?.id,
-  });
+  } = useFinanceTransactions();
 
+  const { selectedSpace, setSelectedSpace } = useFinanceSpace();
   const transactions = transactionsData?.transactions ?? [];
 
   const income = transactions.reduce(
@@ -317,14 +257,6 @@ export default function Finance() {
 
   const remainingPercentage = 100 - expensePercentage;
 
-  if (loading) {
-    return <p>Загрузка финансов...</p>;
-  }
-
-  if (error) {
-    return <p>Не удалось загрузить финансовые пространства.</p>;
-  }
-
   return (
     <div>
       <div className="flex flex-col gap-x-5 mb-5">
@@ -332,124 +264,16 @@ export default function Finance() {
           <div className="flex items-center gap-x-2.5">
             <h2 className="font-semibold text-2xl">Финансы</h2>
             <Link
-              href={`/dashboard/finance/${selectedSpace.slug}/settings`}
+              href={`/dashboard/finance/${selectedSpace?.slug}/settings`}
               className="cursor-pointer"
             >
               <Settings />
             </Link>
           </div>
-          <div className="flex items-center gap-x-5">
-            <div className="bg-[#E3E9E5] flex gap-x-2.5 p-1 rounded-sm">
-              {spaceItems.map((spaceItem) => {
-                const activeSpaceID = selectedSpace?.id === spaceItem.id;
-
-                return (
-                  <button
-                    type="button"
-                    key={spaceItem.id}
-                    className={`${activeSpaceID ? "bg-white" : "bg-transparent"}  cursor-pointer flex items-center gap-x-2.5 rounded-sm py-2.5 pl-4 pr-2.5`}
-                    onClick={() => handleSetSelectedSpaceID(spaceItem.id)}
-                  >
-                    <span>{spaceItem.name}</span>
-
-                    <span
-                      className="cursor-pointer"
-                      onClick={() =>
-                        setOpenMenuID((prev) =>
-                          prev === spaceItem.id ? null : spaceItem.id,
-                        )
-                      }
-                    >
-                      <EllipsisVertical size={18} />
-                    </span>
-                  </button>
-                );
-              })}
-
-              {/* <button className=" cursor-pointer py-2.5 px-5 rounded-sm">
-              Business
-            </button> */}
-            </div>
-            <button
-              className="cursor-pointer"
-              type="button"
-              onClick={() => router.push("/dashboard/finance/spaces/new")}
-            >
-              <CirclePlus color="#0f7a4f" />
-            </button>
-          </div>
+          <FinanceSpace />
         </div>
-
-        {/* <div className="flex items-center gap-x-3 mb-5">
-          {spaces.map((space) => {
-            const isActive = selectedSpace?.id === space.id;
-
-            return (
-              <button
-                key={space.id}
-                type="button"
-                onClick={() => setSelectedSpaceId(space.id)}
-                className={`cursor-pointer rounded-md px-5 py-2 text-sm uppercase transition ${
-                  isActive
-                    ? "bg-yellow text-black"
-                    : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-neutral-800"
-                }`}
-              >
-                {space.name}
-              </button>
-            );
-          })}
-          <button
-            className="cursor-pointer rounded-full border-2 w-8 h-8 text-2xl flex items-center justify-center"
-            onClick={() => {
-              setSpaceName("");
-              setIsCreateSpaceModalOpen(true);
-            }}
-            disabled={creatingSpace}
-          >
-            {creatingSpace ? (
-              <LoaderCircle className="animate-spin" size={20} color="#000" />
-            ) : (
-              "+"
-            )}
-          </button>
-          {createSpaceError && (
-            <p className="text-red-500">
-              Не удалось создать финансовое пространство.
-            </p>
-          )}
-        </div> */}
       </div>
-      {/* <DashboardCard
-        selectedSpace={selectedSpace.name}
-        title="Каржы есебы"
-        icon={<Wallet className="dark:text-yellow  w-5 md:w-7 md:h-7 h-5" />}
-        border
-        action={
-          <button
-            className="cursor-pointer text-sm border border-transparent dark:border-yellow bg-[#FFF4D0] dark:bg-[#121211] text-black dark:text-yellow-400 rounded-md px-5 py-2"
-            onClick={() => handleOpenModal("income", "select")}
-          >
-            + Қосу
-          </button>
-        }
-      >
-        <div className="flex flex-col gap-y-2">
-          <FinanceTransactionList
-            title="Шығындар"
-            totalLabel="Күндік жалпы шығын:"
-            total="125 000 тг"
-            color="text-red-500"
-            iconBg="bg-red-500"
-            action={() => handleOpenModal("expense")}
-            items={expenses}
-          />
-          <button className="flex items-center justify-center gap-x-2">
-            <span className="text-yellow">Барлыгын кору</span>
-            <ArrowRight className="text-yellow" />
-          </button>
-        </div>
-      </DashboardCard> */}
+
       <div className="flex gap-x-6">
         <div className="max-w-3/5 w-full">
           <div className="bg-[#0f7a4f] z-10 overflow-hidden  relative mb-6 rounded-lg p-7.5 text-white">
@@ -604,78 +428,6 @@ export default function Finance() {
           modalMode={modalMode}
         />
       </MainModal>
-
-      {/* <MainModal
-        open={isCreateSpaceModalOpen}
-        onClose={() => setIsCreateSpaceModalOpen(false)}
-      >
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-
-            const name = spaceName.trim();
-            if (!name || creatingSpace) return;
-
-            try {
-              await createFinanceSpace({
-                variables: {
-                  input: { name },
-                },
-                refetchQueries: [{ query: FINANCE_SPACES }],
-                awaitRefetchQueries: true,
-              });
-
-              setIsCreateSpaceModalOpen(false);
-              setSpaceName("");
-            } catch (error) {
-              console.error("Ошибка создания пространства:", error);
-            }
-          }}
-          className="w-full max-w-sm space-y-4 p-5"
-        >
-          <h2 className="text-lg font-semibold">Новое пространство</h2>
-
-          <div>
-            <label htmlFor="spaceName" className="mb-2 block text-sm">
-              Название
-            </label>
-
-            <input
-              id="spaceName"
-              type="text"
-              value={spaceName}
-              onChange={(e) => setSpaceName(e.target.value)}
-              placeholder="Например, Business"
-              maxLength={50}
-              required
-              autoFocus
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 outline-none focus:border-yellow dark:border-neutral-700"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setIsCreateSpaceModalOpen(false)}
-              className="rounded-md px-4 py-2 text-sm"
-            >
-              Отмена
-            </button>
-
-            <button
-              type="submit"
-              disabled={!spaceName.trim() || creatingSpace}
-              className="rounded-md bg-yellow px-4 py-2 text-sm text-black disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {creatingSpace ? (
-                <LoaderCircle className="animate-spin" size={20} color="#000" />
-              ) : (
-                "Создать"
-              )}
-            </button>
-          </div>
-        </form>
-      </MainModal> */}
     </div>
   );
 }
